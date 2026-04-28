@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baal Satsang</title>
+
+<style>
+:root{
+  --primary:#1976d2;
+  --bg:#f0f2f5;
+  --card:#ffffff;
+  --green:#25D366;
+}
+body{font-family:Arial;background:var(--bg);margin:0;padding:10px;}
+
+.header{
+  background:var(--primary);
+  color:#fff;
+  text-align:center;
+  padding:14px;
+  border-radius:10px;
+  font-weight:bold;
+  font-size:20px;
+}
+
+.card{
+  background:var(--card);
+  padding:15px;
+  margin:10px auto;
+  max-width:520px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+button{
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.main-btn{
+  width:100%;
+  padding:12px;
+  background:var(--primary);
+  color:#fff;
+  margin-top:8px;
+}
+
+.contact-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#f9f9f9;
+  padding:10px;
+  border-radius:8px;
+  margin:8px 0;
+}
+
+.inline-btns{display:flex;gap:5px;}
+
+.small-btn{padding:6px 10px;}
+
+.call{background:#4CAF50;color:#fff;}
+.wa{background:var(--green);color:#fff;}
+
+.flex{display:flex;gap:6px;margin-top:6px;}
+
+.back{
+  background:#777;
+  color:#fff;
+  width:100%;
+  padding:10px;
+}
+
+.clock{text-align:center;font-weight:bold;margin-bottom:10px;}
+
+/* LOCATION */
+.location-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+
+.location-box{
+  background:#f1f1f1;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+  font-weight:bold;
+}
+
+.location-box a{
+  text-decoration:none;
+  color:#1976d2;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Baal Satsang</div>
+
+<!-- MAIN -->
+<div id="mainPage" class="card">
+<div class="clock" id="clockMain"></div>
+
+<div class="contact-row">
+<div><b>Rakesh Sharma</b><br>9784616005</div>
+<div class="inline-btns">
+<button class="small-btn call" onclick="call('9784616005')">📞</button>
+<button class="small-btn wa" onclick="wa('9784616005')">💬</button>
+</div>
+</div>
+
+<div class="contact-row">
+<div><b>Gurmit Singh</b><br>9414041873</div>
+<div class="inline-btns">
+<button class="small-btn call" onclick="call('9414041873')">📞</button>
+<button class="small-btn wa" onclick="wa('9414041873')">💬</button>
+</div>
+</div>
+
+<button class="main-btn" onclick="openPage('area')">Area wise Sewadar</button>
+<button class="main-btn" onclick="openPage('sewa')">Sewa wise Sewadar</button>
+<button class="main-btn" onclick="openPage('location')">📍 Satsang Ghar Location</button>
+</div>
+
+<!-- AREA -->
+<div id="areaPage" class="card" style="display:none">
+<div class="clock" id="clockArea"></div>
+<button class="back" onclick="goBack()">⬅ Back</button>
+
+<input list="areaList" id="areaInput" placeholder="Area">
+<datalist id="areaList"></datalist>
+
+<input list="sewaList" id="sewaInput" placeholder="Sewa">
+<datalist id="sewaList"></datalist>
+
+<input list="nameList" id="nameInput" placeholder="Name">
+<datalist id="nameList"></datalist>
+
+<input id="mobile" placeholder="Mobile" readonly>
+<input id="badge" placeholder="Badge" readonly>
+
+<div class="flex">
+<button id="callBtn" class="call" style="display:none">📞</button>
+<button id="waBtn" class="wa" style="display:none">💬</button>
+</div>
+</div>
+
+<!-- SEWA -->
+<div id="sewaPage" class="card" style="display:none">
+<div class="clock" id="clockSewa"></div>
+<button class="back" onclick="goBack()">⬅ Back</button>
+
+<input list="sewaList2" id="sewaInput2" placeholder="Sewa">
+<datalist id="sewaList2"></datalist>
+
+<input list="nameList2" id="nameInput2" placeholder="Name">
+<datalist id="nameList2"></datalist>
+
+<input id="mobile2" placeholder="Mobile" readonly>
+<input id="badge2" placeholder="Badge" readonly>
+
+<div class="flex">
+<button id="callBtn2" class="call" style="display:none">📞</button>
+<button id="waBtn2" class="wa" style="display:none">💬</button>
+</div>
+</div>
+
+<!-- LOCATION -->
+<div id="locationPage" class="card" style="display:none">
+<div class="clock" id="clockLocation"></div>
+<button class="back" onclick="goBack()">⬅ Back</button>
+
+<h3>Satsang Ghar Locations</h3>
+<div id="locationGrid" class="location-grid"></div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbzclpBeiRtFvn6p89BAHJJBAsPGC-4tfGNuPTWyr949mIFfzvOp4Vj4v1cZ3Jf_2Q40AQ/exec";
+
+const sheet1=API+"?sheet=data1";
+const sheet2=API+"?sheet=data2";
+const sheet3=API+"?sheet=data4";
+
+let data1=[], data2=[], data3=[];
+
+function openPage(p){
+document.getElementById("mainPage").style.display="none";
+document.getElementById(p+"Page").style.display="block";
+}
+
+function goBack(){ location.reload(); }
+
+function call(n){ window.open("tel:"+n); }
+function wa(n){ window.open("https://wa.me/"+n); }
+
+/* CLOCK */
+setInterval(()=>{
+let d=new Date();
+let t=`${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+["clockMain","clockArea","clockSewa","clockLocation"].forEach(id=>{
+let e=document.getElementById(id);
+if(e) e.innerText=t;
+});
+},1000);
+
+/* FETCH */
+fetch(sheet1).then(r=>r.json()).then(d=>{
+data1=d;
+areaList.innerHTML=[...new Set(d.map(x=>x.Area))].map(v=>`<option value="${v}">`).join("");
+});
+
+fetch(sheet2).then(r=>r.json()).then(d=>{
+data2=d;
+sewaList2.innerHTML=[...new Set(d.map(x=>x.Sewa))].map(v=>`<option value="${v}">`).join("");
+});
+
+fetch(sheet3).then(r=>r.json()).then(d=>{
+data3=d;
+loadLocations();
+});
+
+/* AREA FILTER FIXED */
+areaInput.oninput=()=>{
+let f=data1.filter(x=>x.Area?.toLowerCase().includes(areaInput.value.toLowerCase()));
+sewaList.innerHTML=[...new Set(f.map(x=>x.Sewa))].map(v=>`<option value="${v}">`).join("");
+};
+
+sewaInput.oninput=()=>{
+let f=data1.filter(x =>
+  x.Area==areaInput.value &&
+  x.Sewa?.toLowerCase().includes(sewaInput.value.toLowerCase())
+);
+nameList.innerHTML=[...new Set(f.map(x=>x.Name))].map(v=>`<option value="${v}">`).join("");
+};
+
+nameInput.oninput=()=>{
+let r=data1.find(x =>
+  x.Area==areaInput.value &&
+  x.Sewa==sewaInput.value &&
+  x.Name==nameInput.value
+);
+if(r){
+mobile.value=r.Mobile;
+badge.value=r.Badge;
+callBtn.style.display="block";
+waBtn.style.display="block";
+callBtn.onclick=()=>call(r.Mobile);
+waBtn.onclick=()=>wa(r.Mobile);
+}
+};
+
+/* SEWA */
+sewaInput2.oninput=()=>{
+let f=data2.filter(x=>x.Sewa==sewaInput2.value);
+nameList2.innerHTML=[...new Set(f.map(x=>x.Name))].map(v=>`<option value="${v}">`).join("");
+};
+
+nameInput2.oninput=()=>{
+let r=data2.find(x=>x.Name==nameInput2.value);
+if(r){
+mobile2.value=r.Mobile;
+badge2.value=r.Badge;
+callBtn2.style.display="block";
+waBtn2.style.display="block";
+callBtn2.onclick=()=>call(r.Mobile);
+waBtn2.onclick=()=>wa(r.Mobile);
+}
+};
+
+/* LOCATION */
+function loadLocations(){
+let grid=document.getElementById("locationGrid");
+grid.innerHTML="";
+
+data3.forEach(loc=>{
+let keys=Object.keys(loc);
+let name=loc[keys[0]];
+let lat=loc[keys[1]];
+let lng=loc[keys[2]];
+
+if(!lat || !lng) return;
+
+let box=document.createElement("div");
+box.className="location-box";
+
+let a=document.createElement("a");
+a.href=`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+a.target="_blank";
+a.innerText=name;
+
+box.appendChild(a);
+grid.appendChild(box);
+});
+}
+</script>
+
+</body>
+</html>
